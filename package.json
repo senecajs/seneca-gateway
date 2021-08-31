@@ -1,0 +1,52 @@
+{
+  "name": "@seneca/gateway",
+  "version": "0.1.0",
+  "main": "dist/gateway.js",
+  "type": "commonjs",
+  "browser": "dist/kv.min.js",
+  "types": "kv.d.ts",
+  "description": "KV",
+  "homepage": "https://github.com/senecajs/seneca-gateway",
+  "keywords": [
+    "pattern",
+    "matcher",
+    "object",
+    "property",
+    "json"
+  ],
+  "author": "Richard Rodger (http://richardrodger.com)",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/senecajs/seneca-gateway.git"
+  },
+  "scripts": {
+    "test": "jest --coverage",
+    "test-some": "jest -t",
+    "test-watch": "jest --coverage --watchAll",
+    "watch": "tsc -w -d",
+    "build": "tsc -d",
+    "clean": "rm -rf node_modules yarn.lock package-lock.json",
+    "reset": "npm run clean && npm i && npm test",
+    "repo-tag": "REPO_VERSION=`node -e \"console.log(require('./package').version)\"` && echo TAG: v$REPO_VERSION && git commit -a -m v$REPO_VERSION && git push && git tag v$REPO_VERSION && git push --tags;",
+    "repo-publish": "npm run clean && npm i && npm run repo-publish-quick",
+    "repo-publish-quick": "npm run prettier && npm run build && npm run test && npm run test-web && npm run repo-tag && npm publish --registry http://registry.npmjs.org "
+  },
+  "license": "MIT",
+  "files": [
+    "dist",
+    "LICENSE"
+  ],
+  "devDependencies": {
+    "@types/jest": "^26.0.24",
+    "browserify": "^17.0.0",
+    "esbuild": "^0.12.24",
+    "esbuild-jest": "^0.5.0",
+    "jest": "^27.0.6",
+    "typescript": "^4.3.5"
+  },
+  "dependencies": {
+    "seneca": "^3.23.3",
+    "seneca-msg-test": "^3.2.0",
+    "seneca-promisify": "^2.0.0"
+  }
+}
