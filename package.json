@@ -1,6 +1,6 @@
 {
   "name": "@seneca/gateway",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "main": "dist/gateway.js",
   "type": "commonjs",
   "types": "dist/gateway.d.ts",
@@ -30,6 +30,7 @@
   "license": "MIT",
   "files": [
     "dist",
+    "src",
     "LICENSE"
   ],
   "devDependencies": {
