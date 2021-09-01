@@ -74,8 +74,21 @@ function gateway(this: any, options: any) {
 
         // Don't expose internal activity unless debugging
         if (!options.debug) {
-          out.meta$ = {
-            id: out.meta$.id
+
+          // TODO: externalize_reply should help with this
+          if (err) {
+            out = {
+              seneca$: true,
+              code$: err.code,
+              error$: true,
+              meta$: out.$meta,
+            }
+          }
+
+          if (out.meta$) {
+            out.meta$ = {
+              id: out.meta$.id
+            }
           }
         }
 
@@ -122,9 +135,25 @@ function gateway(this: any, options: any) {
   }
 
 
+  function parseJSON(data: any) {
+    if (null == data) return {}
+
+    let str = String(data)
+
+    try {
+      return JSON.parse(str)
+    } catch (e: any) {
+      e.error$ = e.message
+      e.input$ = str
+      return e
+    }
+  }
+
+
   return {
     exports: {
-      handler: handler
+      handler,
+      parseJSON,
     }
   }
 }
