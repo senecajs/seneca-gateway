@@ -48,22 +48,22 @@ function gateway(this: any, options: any) {
 
 
   // Handle inbound JSON, converting it into a message, and submitting to Seneca.
-  async function handler(json: any) {
-    const seneca = prepare_seneca(json)
+  async function handler(json: any, ctx: any) {
+    const seneca = await prepare(json, ctx)
     const msg = tu.internalize_msg(seneca, json)
 
-    return await new Promise(resolve => {
+    return await new Promise(async (resolve) => {
       var out = null
       for (var i = 0; i < hooks.action.length; i++) {
-        out = hooks.action[i].call(seneca, msg)
+        out = await hooks.action[i].call(seneca, msg, ctx)
         if (out) {
           return resolve(out)
         }
       }
 
-      seneca.act(msg, function(this: any, err: any, out: any, meta: any) {
+      seneca.act(msg, async function(this: any, err: any, out: any, meta: any) {
         for (var i = 0; i < hooks.result.length; i++) {
-          hooks.result[i].call(seneca, out, msg, err, meta)
+          await hooks.result[i].call(seneca, out, msg, err, meta, ctx)
         }
 
         if (err && !options.debug) {
@@ -98,7 +98,7 @@ function gateway(this: any, options: any) {
   }
 
 
-  function prepare_seneca(json: any) {
+  async function prepare(json: any, ctx: any) {
     let i, hookaction
 
     let custom: any = {}
@@ -108,7 +108,7 @@ function gateway(this: any, options: any) {
         custom = seneca.util.deep(custom, hookaction)
       }
       else {
-        hookaction(custom, json)
+        await hookaction(custom, json, ctx)
       }
     }
 
@@ -120,7 +120,7 @@ function gateway(this: any, options: any) {
         fixed = seneca.util.deep(fixed, hookaction)
       }
       else {
-        hookaction(fixed, json)
+        await hookaction(fixed, json, ctx)
       }
     }
 
@@ -128,7 +128,7 @@ function gateway(this: any, options: any) {
     const delegate = root.delegate(fixed, { custom: custom })
 
     for (i = 0; i < hooks.delegate.length; i++) {
-      hooks.delegate[i](delegate, json)
+      await hooks.delegate[i](delegate, json, ctx)
     }
 
     return delegate
