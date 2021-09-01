@@ -139,3 +139,7 @@ gateway.defaults = {
 
 
 export default gateway
+
+if ('undefined' !== typeof (module)) {
+  module.exports = gateway
+}
