@@ -1,8 +1,10 @@
 module.exports = {
   transform: {
-    "^.+\\.tsx?$": "esbuild-jest"
+    "^.+\\.tsx?$": ["esbuild-jest", {sourcemap:true}]
   },
   testEnvironment: 'node',
   testMatch: ['**/test/**/*.test.ts'],
-  watchPathIgnorePatterns: ['.*.js$'],
+  watchPathIgnorePatterns: ['dist\\/'],
+  collectCoverageFrom: ['src/**/*.ts'],
+  coverageProvider: 'v8',
 };
