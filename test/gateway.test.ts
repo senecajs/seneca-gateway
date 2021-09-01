@@ -19,7 +19,7 @@ describe('gateway', () => {
     await (SenecaMsgTest(seneca, GatewayMessages)())
   })
 
-  test('action_handler', async () => {
+  test('handler', async () => {
     const seneca = Seneca({ legacy: false }).test().use('promisify').use(Gateway)
     seneca.message('foo:1', async (msg: any, meta: any) => ({
       q: msg.q, ay: msg.y, ax: meta.custom.x

@@ -1,4 +1,6 @@
-export default function gateway(this: any, options: any) {
+/* Copyright © 2021 Richard Rodger, MIT License. */
+
+function gateway(this: any, options: any) {
   const seneca: any = this
   const root: any = seneca.root
   const tu: any = seneca.export('transport/utils')
@@ -127,3 +129,13 @@ export default function gateway(this: any, options: any) {
   }
 }
 
+
+// Default options.
+gateway.defaults = {
+
+  // When true, errors will include stack trace.
+  debug: false
+}
+
+
+export default gateway
