@@ -52,6 +52,9 @@ function gateway(this: any, options: any) {
     const seneca = await prepare(json, ctx)
     const msg = tu.internalize_msg(seneca, json)
 
+    // TODO: mark unsafe!
+    // TODO: disallow directives!
+
     return await new Promise(async (resolve) => {
       var out = null
       for (var i = 0; i < hooks.action.length; i++) {
@@ -101,7 +104,7 @@ function gateway(this: any, options: any) {
   async function prepare(json: any, ctx: any) {
     let i, hookaction
 
-    let custom: any = {}
+    let custom: any = seneca.util.deep({}, options.custom)
     for (i = 0; i < hooks.custom.length; i++) {
       hookaction = hooks.custom[i]
       if ('object' === typeof (hookaction)) {
@@ -113,7 +116,7 @@ function gateway(this: any, options: any) {
     }
 
 
-    let fixed = {}
+    let fixed: any = seneca.util.deep({}, options.fixed)
     for (i = 0; i < hooks.fixed.length; i++) {
       hookaction = hooks.fixed[i]
       if ('object' === typeof (hookaction)) {
@@ -161,6 +164,14 @@ function gateway(this: any, options: any) {
 
 // Default options.
 gateway.defaults = {
+
+  custom: {
+
+    // Assume gateway is used to handle external messages.
+    safe: false
+  },
+
+  fixed: {},
 
   // When true, errors will include stack trace.
   debug: false

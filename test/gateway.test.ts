@@ -20,9 +20,21 @@ describe('gateway', () => {
   })
 
   test('handler', async () => {
-    const seneca = Seneca({ legacy: false }).test().use('promisify').use(Gateway)
+    const seneca = Seneca({ legacy: false })
+      .test()
+      .use('promisify')
+      .use(Gateway, {
+        custom: {
+          z: 3
+        }
+      })
+
     seneca.message('foo:1', async (msg: any, meta: any) => ({
-      q: msg.q, ay: msg.y, ax: meta.custom.x
+      q: msg.q,
+      ay: msg.y,
+      ax: meta.custom.x,
+      az: meta.custom.z,
+      safe: meta.custom.safe
     }))
     seneca.act('sys:gateway,add:hook,hook:custom', { action: { x: 1 } })
     seneca.act('sys:gateway,add:hook,hook:fixed',
@@ -32,7 +44,12 @@ describe('gateway', () => {
     let handler = seneca.export('gateway/handler')
     let out = await handler({ foo: 1, q: 99 })
     expect(out.meta$.id).toBeDefined()
-    expect(out).toMatchObject({ q: 99, ay: 2, ax: 1 })
+    expect(out).toMatchObject({ q: 99, ay: 2, ax: 1, az: 3, safe: false })
+
+
+    // Can't make unsafe safe!
+    out = await handler({ foo: 1, q: 99, custom$: { safe: true } })
+    expect(out).toMatchObject({ q: 99, ay: 2, ax: 1, az: 3, safe: false })
   })
 })
 
