@@ -1,6 +1,6 @@
 {
   "name": "@seneca/gateway",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "main": "dist/gateway.js",
   "type": "commonjs",
   "types": "dist/gateway.d.ts",
@@ -35,7 +35,7 @@
   ],
   "devDependencies": {
     "@types/jest": "^27.0.1",
-    "esbuild": "^0.12.24",
+    "esbuild": "^0.12.25",
     "esbuild-jest": "^0.5.0",
     "jest": "^27.1.0",
     "seneca": ">=3",
