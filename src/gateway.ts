@@ -16,9 +16,11 @@ function gateway(this: any, options: any) {
     // Functions to modify the seneca request delegate
     'delegate',
 
+    // TODO: rename: before
     // Functions to modify the action or message
     'action',
 
+    // TODO: rename: after
     // Functions to modify the result
     'result'
   ]
@@ -52,7 +54,6 @@ function gateway(this: any, options: any) {
     const seneca = await prepare(json, ctx)
     const msg = tu.internalize_msg(seneca, json)
 
-    // TODO: mark unsafe!
     // TODO: disallow directives!
 
     return await new Promise(async (resolve) => {
