@@ -4,10 +4,10 @@
 
 Handle incoming messages within other frameworks.
 
-[![npm version][https://img.shields.io/npm/v/@seneca/gateway.svg]][https://npmjs.com/package/@seneca/gateway]
+[![npm version](https://img.shields.io/npm/v/@seneca/gateway.svg)](https://npmjs.com/package/@seneca/gateway)
 [![Build](https://github.com/senecajs/seneca-gateway/actions/workflows/build.yml/badge.svg)](https://github.com/senecajs/seneca-gateway/actions/workflows/build.yml)
-[![Coverage Status][https://coveralls.io/repos/github/senecajs/seneca-gateway/badge.svg?branch=main]][https://coveralls.io/github/senecajs/seneca-gateway?branch=main]
-[![Dependency Status][https://david-dm.org/senecajs/seneca-gateway.svg]][https://david-dm.org/senecajs/seneca-gateway]
+[![Coverage Status](https://coveralls.io/repos/github/senecajs/seneca-gateway/badge.svg?branch=main)](https://coveralls.io/github/senecajs/seneca-gateway?branch=main)
+[![Known Vulnerabilities](https://snyk.io/test/github/fastify/fastify/badge.svg)](https://snyk.io/test/github/fastify/fastify)
 [![DeepScan grade](https://deepscan.io/api/teams/5016/projects/11434/branches/170370/badge/grade.svg)](https://deepscan.io/dashboard#view=project&tid=5016&pid=11434&bid=170370)
 [![Maintainability](https://api.codeclimate.com/v1/badges/47fe47f0b317507cb120/maintainability)](https://codeclimate.com/github/rjrodger/ordu/maintainability)
 
