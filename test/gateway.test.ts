@@ -1,6 +1,4 @@
 
-import { Maintain } from '@seneca/maintain'
-
 import Gateway from '../src/gateway'
 
 const Seneca = require('seneca')
@@ -15,9 +13,6 @@ describe('gateway', () => {
     const seneca = Seneca({ legacy: false }).test().use('promisify').use(Gateway)
     await seneca.ready()
   })
-
-  test('maintain', Maintain)
-
 
   test('messages', async () => {
     const seneca = Seneca({ legacy: false }).test().use('promisify').use(Gateway)
