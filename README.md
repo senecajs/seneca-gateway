@@ -11,6 +11,23 @@ Handle incoming messages within other frameworks.
 [![DeepScan grade](https://deepscan.io/api/teams/5016/projects/19453/branches/505563/badge/grade.svg)](https://deepscan.io/dashboard#view=project&tid=5016&pid=19453&bid=505563)
 [![Maintainability](https://api.codeclimate.com/v1/badges/9d54b38a991fe7b92a43/maintainability)](https://codeclimate.com/github/senecajs/seneca-gateway/maintainability)
 
-| ![Voxgig](https://www.voxgig.com/res/img/vgt01r.png) | This open source module is sponsored and supported by [Voxgig](https://www.voxgig.com). |
-|---|---|
+# @seneca/gateway
 
+| ![Voxgig](https://www.voxgig.com/res/img/vgt01r.png) | This open source module is sponsored and supported by [Voxgig](https://www.voxgig.com). |
+| ---------------------------------------------------- | --------------------------------------------------------------------------------------- |
+
+## Install
+
+## Quick Example
+
+## More Examples
+
+## Motivation
+
+## Support
+
+## API
+
+## Contributing
+
+## Background
