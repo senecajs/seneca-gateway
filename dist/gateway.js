@@ -1,6 +1,7 @@
 "use strict";
-/* Copyright © 2021 Richard Rodger, MIT License. */
+/* Copyright © 2021-2022 Richard Rodger, MIT License. */
 Object.defineProperty(exports, "__esModule", { value: true });
+const gubu_1 = require("gubu");
 function gateway(options) {
     const seneca = this;
     const root = seneca.root;
@@ -101,9 +102,10 @@ function gateway(options) {
                 await hookaction(fixed, json, ctx);
             }
         }
+        // NOTE: a new delegate is created for each request to ensure isolation.
         const delegate = root.delegate(fixed, { custom: custom });
         for (i = 0; i < hooks.delegate.length; i++) {
-            await hooks.delegate[i](delegate, json, ctx);
+            await hooks.delegate[i].call(delegate, json, ctx);
         }
         return delegate;
     }
@@ -129,11 +131,11 @@ function gateway(options) {
 }
 // Default options.
 gateway.defaults = {
-    custom: {
+    custom: (0, gubu_1.Open)({
         // Assume gateway is used to handle external messages.
         safe: false
-    },
-    fixed: {},
+    }),
+    fixed: (0, gubu_1.Open)({}),
     // When true, errors will include stack trace.
     debug: false
 };

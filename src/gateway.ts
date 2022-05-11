@@ -1,4 +1,8 @@
-/* Copyright © 2021 Richard Rodger, MIT License. */
+/* Copyright © 2021-2022 Richard Rodger, MIT License. */
+
+
+import { Open } from 'gubu'
+
 
 function gateway(this: any, options: any) {
   const seneca: any = this
@@ -128,11 +132,11 @@ function gateway(this: any, options: any) {
       }
     }
 
-
+    // NOTE: a new delegate is created for each request to ensure isolation.
     const delegate = root.delegate(fixed, { custom: custom })
 
     for (i = 0; i < hooks.delegate.length; i++) {
-      await hooks.delegate[i](delegate, json, ctx)
+      await hooks.delegate[i].call(delegate, json, ctx)
     }
 
     return delegate
@@ -166,13 +170,13 @@ function gateway(this: any, options: any) {
 // Default options.
 gateway.defaults = {
 
-  custom: {
+  custom: Open({
 
     // Assume gateway is used to handle external messages.
     safe: false
-  },
+  }),
 
-  fixed: {},
+  fixed: Open({}),
 
   // When true, errors will include stack trace.
   debug: false

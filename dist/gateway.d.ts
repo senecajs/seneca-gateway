@@ -6,10 +6,12 @@ declare function gateway(this: any, options: any): {
 };
 declare namespace gateway {
     var defaults: {
-        custom: {
-            safe: boolean;
+        custom: import("gubu").Node & {
+            [name: string]: any;
         };
-        fixed: {};
+        fixed: import("gubu").Node & {
+            [name: string]: any;
+        };
         debug: boolean;
     };
 }
