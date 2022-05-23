@@ -1,6 +1,6 @@
 {
   "name": "@seneca/gateway",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "main": "dist/gateway.js",
   "type": "commonjs",
   "types": "dist/gateway.d.ts",
