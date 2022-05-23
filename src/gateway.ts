@@ -91,10 +91,12 @@ function gateway(this: any, options: any) {
           // TODO: externalize_reply should help with this
           if (err) {
             out = {
-              seneca$: true,
-              code$: err.code,
-              error$: true,
-              meta$: out.$meta,
+              handler$: {
+                seneca: true,
+                code: err.code,
+                error: true,
+                meta: out.$meta,
+              }
             }
           }
 
@@ -156,8 +158,10 @@ function gateway(this: any, options: any) {
     try {
       return JSON.parse(str)
     } catch (e: any) {
-      e.error$ = e.message
-      e.input$ = str
+      e.handler$ = {
+        error$: e.message,
+        input$: str,
+      }
       return e
     }
   }
