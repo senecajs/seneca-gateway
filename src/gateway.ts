@@ -5,7 +5,7 @@ import { Open } from 'gubu'
 
 
 function gateway(this: any, options: any) {
-  const seneca: any = this
+  let seneca: any = this
   const root: any = seneca.root
   const tu: any = seneca.export('transport/utils')
 
@@ -30,6 +30,11 @@ function gateway(this: any, options: any) {
   ]
 
   const hooks: any = hooknames.reduce((a: any, n) => (a[n] = [], a), {})
+
+  const tag = seneca.plugin.tag
+  if (null != tag && '-' !== tag) {
+    seneca = seneca.fix({ tag })
+  }
 
   seneca.message('sys:gateway,add:hook', async function add_hook(msg: any) {
     let hook: string = msg.hook

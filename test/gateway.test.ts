@@ -51,5 +51,20 @@ describe('gateway', () => {
     out = await handler({ foo: 1, q: 99, custom$: { safe: true } })
     expect(out).toMatchObject({ q: 99, ay: 2, ax: 1, az: 3, safe: false })
   })
+
+
+  test('tag', async () => {
+    const seneca = Seneca({ legacy: false }).test().use('promisify').use({
+      define: Gateway, tag: 'foo'
+    })
+    await seneca.ready()
+    // console.log(seneca.list_plugins())
+    // console.log(seneca.list('sys:gateway'))
+    expect(seneca.list('sys:gateway')).toEqual([
+      { add: 'hook', sys: 'gateway', tag: 'foo' },
+      { get: 'hooks', sys: 'gateway', tag: 'foo' }
+    ])
+  })
+
 })
 

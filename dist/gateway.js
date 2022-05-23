@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const gubu_1 = require("gubu");
 function gateway(options) {
-    const seneca = this;
+    let seneca = this;
     const root = seneca.root;
     const tu = seneca.export('transport/utils');
     const hooknames = [
@@ -21,6 +21,10 @@ function gateway(options) {
         'result'
     ];
     const hooks = hooknames.reduce((a, n) => (a[n] = [], a), {});
+    const tag = seneca.plugin.tag;
+    if (null != tag && '-' !== tag) {
+        seneca = seneca.fix({ tag });
+    }
     seneca.message('sys:gateway,add:hook', async function add_hook(msg) {
         let hook = msg.hook;
         let action = msg.action;
