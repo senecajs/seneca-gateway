@@ -73,6 +73,7 @@ function gateway(options) {
                                 code: err.code,
                                 error: true,
                                 meta: out.$meta,
+                                message: options.error.message ? err.message : null,
                             }
                         };
                     }
@@ -144,6 +145,10 @@ gateway.defaults = {
         safe: false
     }),
     fixed: (0, gubu_1.Open)({}),
+    error: (0, gubu_1.Open)({
+        // Include exception object message property in response.
+        message: false,
+    }),
     // When true, errors will include stack trace.
     debug: false
 };

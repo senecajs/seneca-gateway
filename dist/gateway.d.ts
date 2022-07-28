@@ -12,6 +12,9 @@ declare namespace gateway {
         fixed: import("gubu").Node & {
             [name: string]: any;
         };
+        error: import("gubu").Node & {
+            [name: string]: any;
+        };
         debug: boolean;
     };
 }

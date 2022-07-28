@@ -96,6 +96,7 @@ function gateway(this: any, options: any) {
                 code: err.code,
                 error: true,
                 meta: out.$meta,
+                message: options.error.message ? err.message : null,
               }
             }
           }
@@ -186,6 +187,12 @@ gateway.defaults = {
   }),
 
   fixed: Open({}),
+
+  error: Open({
+
+    // Include exception object message property in response.
+    message: false,
+  }),
 
   // When true, errors will include stack trace.
   debug: false
