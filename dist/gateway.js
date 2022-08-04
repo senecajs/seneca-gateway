@@ -34,6 +34,8 @@ function gateway(options) {
             return { ok: true, hook, count: hookactions.length };
         }
         else {
+            // TODO: this should fail, as usually a startup action
+            // this.throw('no-action', {hook})
             return { ok: false, why: 'no-action' };
         }
     });
@@ -48,7 +50,7 @@ function gateway(options) {
         const msg = tu.internalize_msg(seneca, json);
         // TODO: disallow directives!
         return await new Promise(async (resolve) => {
-            var out = null;
+            let out = null;
             for (var i = 0; i < hooks.action.length; i++) {
                 out = await hooks.action[i].call(seneca, msg, ctx);
                 if (out) {
@@ -62,28 +64,36 @@ function gateway(options) {
                 if (err && !options.debug) {
                     err.stack = null;
                 }
-                var out = tu.externalize_reply(this, err, out, meta);
+                out = tu.externalize_reply(this, err, out, meta);
                 // Don't expose internal activity unless debugging
                 if (!options.debug) {
-                    // TODO: externalize_reply should help with this
-                    if (err) {
-                        out = {
-                            handler$: {
-                                seneca: true,
-                                code: err.code,
-                                error: true,
-                                meta: out.$meta,
-                                message: options.error.message ? err.message : null,
-                            }
-                        };
-                    }
                     if (out.meta$) {
                         out.meta$ = {
                             id: out.meta$.id
                         };
                     }
                 }
-                resolve(out);
+                let result = {
+                    error: false,
+                    out,
+                    meta,
+                    gateway$: out.gateway$ || {}
+                };
+                // Directives in gateway$ moved to result
+                delete out.gateway$;
+                if (err) {
+                    result.error = true;
+                    result.out = {
+                        meta$: out.meta$,
+                        error$: nundef({
+                            name: err.name,
+                            code: err.code,
+                            message: options.error.message ? err.message : undefined,
+                            details: options.error.details ? err.details : undefined,
+                        })
+                    };
+                }
+                resolve(result);
             });
         });
     }
@@ -138,6 +148,14 @@ function gateway(options) {
         }
     };
 }
+function nundef(o) {
+    for (let p in o) {
+        if (undefined === o[p]) {
+            delete o[p];
+        }
+    }
+    return o;
+}
 // Default options.
 gateway.defaults = {
     custom: (0, gubu_1.Open)({
@@ -145,10 +163,12 @@ gateway.defaults = {
         safe: false
     }),
     fixed: (0, gubu_1.Open)({}),
-    error: (0, gubu_1.Open)({
+    error: {
         // Include exception object message property in response.
         message: false,
-    }),
+        // Include exception object details property in response.
+        details: false,
+    },
     // When true, errors will include stack trace.
     debug: false
 };

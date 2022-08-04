@@ -4,13 +4,53 @@
 import { Open } from 'gubu'
 
 
-function gateway(this: any, options: any) {
+type GatewayResult = {
+  // The action result (transport externalized).
+  // OR: a description of the error.
+  out: any | {
+
+    // Externalized meta.
+    meta$: any
+
+    // Extracted from Error object
+    error$: {
+      name: string
+      code?: string
+      message?: string
+      details?: any
+    }
+  }
+
+  // Indicate if result was an error.
+  error: boolean
+
+  // Original meta object.
+  meta?: any
+
+  // Gateway directives embedded in action result.
+  // NOTE: $ suffix as output directive.
+  gateway$: Record<string, any>
+}
+
+
+type GatewayOptions = {
+  custom: any
+  fixed: any,
+  error: {
+    message: boolean
+    details: boolean
+  }
+  debug: boolean
+}
+
+
+function gateway(this: any, options: GatewayOptions) {
   let seneca: any = this
   const root: any = seneca.root
   const tu: any = seneca.export('transport/utils')
 
-
   const hooknames = [
+
     // Functions to modify the custom object in Seneca message meta$ descriptions
     'custom',
 
@@ -36,6 +76,7 @@ function gateway(this: any, options: any) {
     seneca = seneca.fix({ tag })
   }
 
+
   seneca.message('sys:gateway,add:hook', async function add_hook(msg: any) {
     let hook: string = msg.hook
     let action: (...params: any[]) => any = msg.action
@@ -46,6 +87,8 @@ function gateway(this: any, options: any) {
       return { ok: true, hook, count: hookactions.length }
     }
     else {
+      // TODO: this should fail, as usually a startup action
+      // this.throw('no-action', {hook})
       return { ok: false, why: 'no-action' }
     }
   })
@@ -66,7 +109,7 @@ function gateway(this: any, options: any) {
     // TODO: disallow directives!
 
     return await new Promise(async (resolve) => {
-      var out = null
+      let out = null
       for (var i = 0; i < hooks.action.length; i++) {
         out = await hooks.action[i].call(seneca, msg, ctx)
         if (out) {
@@ -83,24 +126,10 @@ function gateway(this: any, options: any) {
           err.stack = null
         }
 
-        var out = tu.externalize_reply(this, err, out, meta)
+        out = tu.externalize_reply(this, err, out, meta)
 
         // Don't expose internal activity unless debugging
         if (!options.debug) {
-
-          // TODO: externalize_reply should help with this
-          if (err) {
-            out = {
-              handler$: {
-                seneca: true,
-                code: err.code,
-                error: true,
-                meta: out.$meta,
-                message: options.error.message ? err.message : null,
-              }
-            }
-          }
-
           if (out.meta$) {
             out.meta$ = {
               id: out.meta$.id
@@ -108,7 +137,30 @@ function gateway(this: any, options: any) {
           }
         }
 
-        resolve(out)
+        let result: GatewayResult = {
+          error: false,
+          out,
+          meta,
+          gateway$: out.gateway$ || {}
+        }
+
+        // Directives in gateway$ moved to result
+        delete out.gateway$
+
+        if (err) {
+          result.error = true
+          result.out = {
+            meta$: out.meta$,
+            error$: nundef({
+              name: err.name,
+              code: (err as any).code,
+              message: options.error.message ? err.message : undefined,
+              details: options.error.details ? err.details : undefined,
+            })
+          }
+        }
+
+        resolve(result)
       })
     })
   }
@@ -167,13 +219,22 @@ function gateway(this: any, options: any) {
     }
   }
 
-
   return {
     exports: {
       handler,
       parseJSON,
     }
   }
+}
+
+
+function nundef(o: any) {
+  for (let p in o) {
+    if (undefined === o[p]) {
+      delete o[p]
+    }
+  }
+  return o
 }
 
 
@@ -188,16 +249,23 @@ gateway.defaults = {
 
   fixed: Open({}),
 
-  error: Open({
-
+  error: {
     // Include exception object message property in response.
     message: false,
-  }),
+
+    // Include exception object details property in response.
+    details: false,
+  },
 
   // When true, errors will include stack trace.
   debug: false
 }
 
+
+export type {
+  GatewayOptions,
+  GatewayResult,
+}
 
 export default gateway
 
