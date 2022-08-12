@@ -10,7 +10,7 @@ declare type GatewayResult = {
     };
     error: boolean;
     meta?: any;
-    gateway$: Record<string, any>;
+    gateway$?: Record<string, any>;
 };
 declare type GatewayOptions = {
     custom: any;

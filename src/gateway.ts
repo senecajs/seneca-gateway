@@ -29,7 +29,7 @@ type GatewayResult = {
 
   // Gateway directives embedded in action result.
   // NOTE: $ suffix as output directive.
-  gateway$: Record<string, any>
+  gateway$?: Record<string, any>
 }
 
 
