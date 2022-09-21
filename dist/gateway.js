@@ -6,6 +6,17 @@ function gateway(options) {
     let seneca = this;
     const root = seneca.root;
     const tu = seneca.export('transport/utils');
+    const Patrun = seneca.util.Patrun;
+    const Jsonic = seneca.util.Jsonic;
+    const allowed = new Patrun({ gex: true });
+    const checkAllowed = null != options.allow;
+    // console.log('CA', checkAllowed, options)
+    if (checkAllowed) {
+        for (let patStr in options.allow) {
+            let pat = Jsonic(patStr);
+            allowed.add(pat, true);
+        }
+    }
     const hooknames = [
         // Functions to modify the custom object in Seneca message meta$ descriptions
         'custom',
@@ -47,9 +58,26 @@ function gateway(options) {
     // Handle inbound JSON, converting it into a message, and submitting to Seneca.
     async function handler(json, ctx) {
         const seneca = await prepare(json, ctx);
-        const msg = tu.internalize_msg(seneca, json);
-        // TODO: disallow directives!
+        const rawmsg = tu.internalize_msg(seneca, json);
+        const msg = seneca.util.clean(rawmsg);
         return await new Promise(async (resolve) => {
+            if (checkAllowed) {
+                let allowMsg = allowed.find(msg);
+                if (!allowMsg) {
+                    return resolve({
+                        error: true,
+                        out: {
+                            meta$: { id: rawmsg.id$ },
+                            error$: nundef({
+                                name: 'Error',
+                                code: 'not-allowed',
+                                message: 'Message not allowed',
+                                details: undefined,
+                            })
+                        }
+                    });
+                }
+            }
             let out = null;
             for (var i = 0; i < hooks.action.length; i++) {
                 out = await hooks.action[i].call(seneca, msg, ctx);
@@ -158,6 +186,7 @@ function nundef(o) {
 }
 // Default options.
 gateway.defaults = {
+    allow: (0, gubu_1.Skip)((0, gubu_1.Open)({})),
     custom: (0, gubu_1.Open)({
         // Assume gateway is used to handle external messages.
         safe: false

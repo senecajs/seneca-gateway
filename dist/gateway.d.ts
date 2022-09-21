@@ -13,6 +13,7 @@ declare type GatewayResult = {
     gateway$?: Record<string, any>;
 };
 declare type GatewayOptions = {
+    allow: any;
     custom: any;
     fixed: any;
     error: {
@@ -29,6 +30,9 @@ declare function gateway(this: any, options: GatewayOptions): {
 };
 declare namespace gateway {
     var defaults: {
+        allow: import("gubu").Node & {
+            [name: string]: any;
+        };
         custom: import("gubu").Node & {
             [name: string]: any;
         };

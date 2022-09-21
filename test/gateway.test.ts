@@ -158,7 +158,94 @@ describe('gateway', () => {
         },
       },
     })
+  })
+
+
+  test('allow', async () => {
+    const seneca = Seneca({ legacy: false }).test().use('promisify').use(Gateway, {
+      allow: {
+        'foo:1': true,
+        'bar:a,zed:b': true
+      }
+    })
+      .message('qaz:2', async function(msg: any) {
+        return { x: { qaz: msg.qaz } }
+      })
+      .message('foo:1', async function(msg: any) {
+        return { x: { foo: msg.foo } }
+      })
+      .message('foo:2', async function(msg: any) {
+        return { x: { foo: msg.foo } }
+      })
+      .message('bar:a,zed:b', async function(msg: any) {
+        return {
+          x: { bar: msg.bar, zed: msg.zed }
+        }
+      })
+      .message('bar:b,zed:b', async function(msg: any) {
+        return {
+          x: { bar: msg.bar, zed: msg.zed }
+        }
+      })
+
+    await seneca.ready()
+    let handler1 = seneca.export('gateway/handler')
+
+
+    expect(await seneca.post('qaz:2')).toEqual({ x: { qaz: 2 } })
+    expect(await seneca.post('foo:1')).toEqual({ x: { foo: 1 } })
+    expect(await seneca.post('foo:2')).toEqual({ x: { foo: 2 } })
+    expect(await seneca.post('bar:a,zed:b')).toEqual({ x: { bar: 'a', zed: 'b' } })
+    expect(await seneca.post('bar:b,zed:b')).toEqual({ x: { bar: 'b', zed: 'b' } })
+
+    let res = await handler1({ foo: 1 })
+    expect(res).toMatchObject({
+      error: false,
+      out: { x: { foo: 1 }, 'meta$': {} },
+      meta: {
+        pattern: 'foo:1',
+      },
+      'gateway$': {}
+    })
+
+    res = await handler1({ foo: 2 })
+    // console.log(res)
+    expect(res).toMatchObject({
+      error: true,
+      out: {
+        'meta$': { id: undefined },
+        'error$': {
+          name: 'Error',
+          code: 'not-allowed',
+          message: 'Message not allowed'
+        }
+      }
+    })
+
+    res = await handler1({ bar: 'a', zed: 'b' })
+    expect(res).toMatchObject({
+      error: false,
+      out: { x: { bar: 'a', zed: 'b' }, 'meta$': {} },
+      meta: {
+        pattern: 'bar:a,zed:b',
+      },
+      'gateway$': {}
+    })
+
+    res = await handler1({ bar: 'b', zed: 'b' })
+    expect(res).toMatchObject({
+      error: true,
+      out: {
+        'meta$': { id: undefined },
+        'error$': {
+          name: 'Error',
+          code: 'not-allowed',
+          message: 'Message not allowed'
+        }
+      }
+    })
 
   })
+
 })
 

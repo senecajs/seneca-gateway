@@ -1,7 +1,7 @@
 /* Copyright © 2021-2022 Richard Rodger, MIT License. */
 
 
-import { Open } from 'gubu'
+import { Open, Skip } from 'gubu'
 
 
 type GatewayResult = {
@@ -34,6 +34,7 @@ type GatewayResult = {
 
 
 type GatewayOptions = {
+  allow: any,
   custom: any
   fixed: any,
   error: {
@@ -48,6 +49,21 @@ function gateway(this: any, options: GatewayOptions) {
   let seneca: any = this
   const root: any = seneca.root
   const tu: any = seneca.export('transport/utils')
+
+  const Patrun = seneca.util.Patrun
+  const Jsonic = seneca.util.Jsonic
+  const allowed = new Patrun({ gex: true })
+
+  const checkAllowed = null != options.allow
+  // console.log('CA', checkAllowed, options)
+
+  if (checkAllowed) {
+    for (let patStr in options.allow) {
+      let pat = Jsonic(patStr)
+      allowed.add(pat, true)
+    }
+  }
+
 
   const hooknames = [
 
@@ -104,11 +120,29 @@ function gateway(this: any, options: GatewayOptions) {
   // Handle inbound JSON, converting it into a message, and submitting to Seneca.
   async function handler(json: any, ctx: any) {
     const seneca = await prepare(json, ctx)
-    const msg = tu.internalize_msg(seneca, json)
+    const rawmsg = tu.internalize_msg(seneca, json)
 
-    // TODO: disallow directives!
+    const msg = seneca.util.clean(rawmsg)
 
     return await new Promise(async (resolve) => {
+      if (checkAllowed) {
+        let allowMsg = allowed.find(msg)
+        if (!allowMsg) {
+          return resolve({
+            error: true,
+            out: {
+              meta$: { id: rawmsg.id$ },
+              error$: nundef({
+                name: 'Error',
+                code: 'not-allowed',
+                message: 'Message not allowed',
+                details: undefined,
+              })
+            }
+          })
+        }
+      }
+
       let out = null
       for (var i = 0; i < hooks.action.length; i++) {
         out = await hooks.action[i].call(seneca, msg, ctx)
@@ -240,6 +274,8 @@ function nundef(o: any) {
 
 // Default options.
 gateway.defaults = {
+
+  allow: Skip(Open({})),
 
   custom: Open({
 
