@@ -1,6 +1,6 @@
 {
   "name": "@seneca/gateway",
-  "version": "0.5.1",
+  "version": "0.6.0",
   "main": "dist/gateway.js",
   "type": "commonjs",
   "types": "dist/gateway.d.ts",
@@ -34,7 +34,7 @@
     "LICENSE"
   ],
   "engines": {
-    "node": ">=12"
+    "node": ">=14"
   },
   "devDependencies": {
     "@seneca/maintain": "^0.0.22",
