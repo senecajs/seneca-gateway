@@ -62,7 +62,16 @@ function gateway(options) {
         const msg = seneca.util.clean(rawmsg);
         return await new Promise(async (resolve) => {
             if (checkAllowed) {
-                let allowMsg = allowed.find(msg);
+                let allowMsg = false;
+                // First, find msg that will be called
+                let msgdef = seneca.find(msg);
+                if (msgdef) {
+                    // Second, check found msg matches allowed patterns
+                    // NOTE: just doing allowed.find(msg) will enable separate messages
+                    // to sneak in: if foo:1 is allowed but not defined, foo:1,role:seneca,...
+                    // will still work, which is not what we want!
+                    allowMsg = !!allowed.find(msgdef.msgcanon);
+                }
                 if (!allowMsg) {
                     return resolve({
                         error: true,

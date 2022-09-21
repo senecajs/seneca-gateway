@@ -165,7 +165,8 @@ describe('gateway', () => {
     const seneca = Seneca({ legacy: false }).test().use('promisify').use(Gateway, {
       allow: {
         'foo:1': true,
-        'bar:a,zed:b': true
+        'bar:a,zed:b': true,
+        'bad:true': true
       }
     })
       .message('qaz:2', async function(msg: any) {
@@ -197,6 +198,7 @@ describe('gateway', () => {
     expect(await seneca.post('foo:2')).toEqual({ x: { foo: 2 } })
     expect(await seneca.post('bar:a,zed:b')).toEqual({ x: { bar: 'a', zed: 'b' } })
     expect(await seneca.post('bar:b,zed:b')).toEqual({ x: { bar: 'b', zed: 'b' } })
+    expect(await seneca.post('bad:true,qaz:2')).toEqual({ x: { qaz: 2 } })
 
     let res = await handler1({ foo: 1 })
     expect(res).toMatchObject({
@@ -233,6 +235,19 @@ describe('gateway', () => {
     })
 
     res = await handler1({ bar: 'b', zed: 'b' })
+    expect(res).toMatchObject({
+      error: true,
+      out: {
+        'meta$': { id: undefined },
+        'error$': {
+          name: 'Error',
+          code: 'not-allowed',
+          message: 'Message not allowed'
+        }
+      }
+    })
+
+    res = await handler1({ bad: true, qaz: 2 })
     expect(res).toMatchObject({
       error: true,
       out: {
