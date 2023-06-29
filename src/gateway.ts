@@ -1,7 +1,9 @@
 /* Copyright © 2021-2022 Richard Rodger, MIT License. */
 
+const Seneca = require('seneca')
+// import { Open, Skip } from 'gubu'
 
-import { Open, Skip } from 'gubu'
+const { Open, Skip } = Seneca.valid
 
 
 type GatewayResult = {

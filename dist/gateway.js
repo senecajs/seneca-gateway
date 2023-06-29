@@ -1,7 +1,9 @@
 "use strict";
 /* Copyright © 2021-2022 Richard Rodger, MIT License. */
 Object.defineProperty(exports, "__esModule", { value: true });
-const gubu_1 = require("gubu");
+const Seneca = require('seneca');
+// import { Open, Skip } from 'gubu'
+const { Open, Skip } = Seneca.valid;
 function gateway(options) {
     let seneca = this;
     const root = seneca.root;
@@ -195,12 +197,12 @@ function nundef(o) {
 }
 // Default options.
 gateway.defaults = {
-    allow: (0, gubu_1.Skip)((0, gubu_1.Open)({})),
-    custom: (0, gubu_1.Open)({
+    allow: Skip(Open({})),
+    custom: Open({
         // Assume gateway is used to handle external messages.
         safe: false
     }),
-    fixed: (0, gubu_1.Open)({}),
+    fixed: Open({}),
     error: {
         // Include exception object message property in response.
         message: false,

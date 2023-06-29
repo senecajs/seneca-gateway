@@ -1,4 +1,4 @@
-declare type GatewayResult = {
+type GatewayResult = {
     out: any | {
         meta$: any;
         error$: {
@@ -12,7 +12,7 @@ declare type GatewayResult = {
     meta?: any;
     gateway$?: Record<string, any>;
 };
-declare type GatewayOptions = {
+type GatewayOptions = {
     allow: any;
     custom: any;
     fixed: any;
@@ -30,15 +30,9 @@ declare function gateway(this: any, options: GatewayOptions): {
 };
 declare namespace gateway {
     var defaults: {
-        allow: import("gubu").Node & {
-            [name: string]: any;
-        };
-        custom: import("gubu").Node & {
-            [name: string]: any;
-        };
-        fixed: import("gubu").Node & {
-            [name: string]: any;
-        };
+        allow: any;
+        custom: any;
+        fixed: any;
         error: {
             message: boolean;
             details: boolean;
