@@ -1,9 +1,11 @@
 "use strict";
-/* Copyright © 2021-2022 Richard Rodger, MIT License. */
+/* Copyright © 2021-2023 Richard Rodger, MIT License. */
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-const Seneca = require('seneca');
-// import { Open, Skip } from 'gubu'
-const { Open, Skip } = Seneca.valid;
+const seneca_1 = __importDefault(require("seneca"));
+const { Open, Skip } = seneca_1.default.valid;
 function gateway(options) {
     let seneca = this;
     const root = seneca.root;
@@ -12,7 +14,6 @@ function gateway(options) {
     const Jsonic = seneca.util.Jsonic;
     const allowed = new Patrun({ gex: true });
     const checkAllowed = null != options.allow;
-    // console.log('CA', checkAllowed, options)
     if (checkAllowed) {
         for (let patStr in options.allow) {
             let pat = Jsonic(patStr);
@@ -59,9 +60,21 @@ function gateway(options) {
     });
     // Handle inbound JSON, converting it into a message, and submitting to Seneca.
     async function handler(json, ctx) {
+        if (options.debug.log) {
+            root.log.debug('gateway-handler-json', { json });
+        }
         const seneca = await prepare(json, ctx);
         const rawmsg = tu.internalize_msg(seneca, json);
         const msg = seneca.util.clean(rawmsg);
+        // Clients can set a custom timeout, up to a maximum.
+        if (options.timeout.client && null != rawmsg.timeout$) {
+            let clientTimeout = +rawmsg.timeout$;
+            let maxTimeout = options.timeout.max;
+            maxTimeout = 0 < maxTimeout ? maxTimeout : seneca.options().timeout;
+            if (clientTimeout <= maxTimeout) {
+                msg.timeout$ = clientTimeout;
+            }
+        }
         return await new Promise(async (resolve) => {
             if (checkAllowed) {
                 let allowMsg = false;
@@ -74,17 +87,30 @@ function gateway(options) {
                     // will still work, which is not what we want!
                     allowMsg = !!allowed.find(msgdef.msgcanon);
                 }
+                else {
+                    seneca.log.debug('msg-not-found', { msg });
+                }
                 if (!allowMsg) {
+                    let errdesc = {
+                        name: 'Error',
+                        code: 'not-allowed',
+                        message: 'Message not allowed',
+                        details: undefined,
+                        pattern: undefined,
+                        allowed: undefined,
+                    };
+                    if (options.debug.response) {
+                        errdesc.pattern = msgdef ? msgdef.pattern : undefined;
+                        errdesc.allowed = msgdef ? allowMsg : undefined;
+                    }
+                    if (options.debug.log) {
+                        seneca.log.debug('handler-not-allowed', { allowMsg, errdesc, msgdef, msg });
+                    }
                     return resolve({
                         error: true,
                         out: {
                             meta$: { id: rawmsg.id$ },
-                            error$: nundef({
-                                name: 'Error',
-                                code: 'not-allowed',
-                                message: 'Message not allowed',
-                                details: undefined,
-                            })
+                            error$: nundef(errdesc)
                         }
                     });
                 }
@@ -93,19 +119,25 @@ function gateway(options) {
             for (var i = 0; i < hooks.action.length; i++) {
                 out = await hooks.action[i].call(seneca, msg, ctx);
                 if (out) {
+                    if (options.debug.log) {
+                        seneca.log.debug('handler-hook-action', { out, msg });
+                    }
                     return resolve(out);
                 }
+            }
+            if (options.debug.log) {
+                seneca.log.debug('handler-act', { msg });
             }
             seneca.act(msg, async function (err, out, meta) {
                 for (var i = 0; i < hooks.result.length; i++) {
                     await hooks.result[i].call(seneca, out, msg, err, meta, ctx);
                 }
-                if (err && !options.debug) {
+                if (err && !options.debug.response) {
                     err.stack = null;
                 }
                 out = tu.externalize_reply(this, err, out, meta);
                 // Don't expose internal activity unless debugging
-                if (!options.debug) {
+                if (!options.debug.response) {
                     if (out.meta$) {
                         out.meta$ = {
                             id: out.meta$.id
@@ -158,6 +190,9 @@ function gateway(options) {
                 await hookaction(fixed, json, ctx);
             }
         }
+        if (options.debug.log) {
+            root.log.debug('gateway-delegate-params', { fixed, custom });
+        }
         // NOTE: a new delegate is created for each request to ensure isolation.
         const delegate = root.delegate(fixed, { custom: custom });
         for (i = 0; i < hooks.delegate.length; i++) {
@@ -197,20 +232,36 @@ function nundef(o) {
 }
 // Default options.
 gateway.defaults = {
+    // Keys are pattern strings.
     allow: Skip(Open({})),
+    // Add custom meta data values.
     custom: Open({
         // Assume gateway is used to handle external messages.
         safe: false
     }),
+    // Set request delegate fixed values.
     fixed: Open({}),
+    // Allow clients to set a custom timeout (using the timeout$ directive).
+    timeout: {
+        // Clients can set a custom timeout.
+        client: false,
+        // Maximum value of client-set timeout.
+        // Default is same as Seneca delegate.
+        max: -1
+    },
     error: {
         // Include exception object message property in response.
         message: false,
         // Include exception object details property in response.
         details: false,
     },
-    // When true, errors will include stack trace.
-    debug: false
+    // Control debug output.
+    debug: {
+        // When true, errors will include stack trace and other meta data.
+        response: false,
+        // Produce detailed debug logging.
+        log: false,
+    }
 };
 exports.default = gateway;
 if ('undefined' !== typeof (module)) {

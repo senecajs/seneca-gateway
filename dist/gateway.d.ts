@@ -16,11 +16,18 @@ type GatewayOptions = {
     allow: any;
     custom: any;
     fixed: any;
+    timeout: {
+        client: boolean;
+        max: number;
+    };
     error: {
         message: boolean;
         details: boolean;
     };
-    debug: boolean;
+    debug: {
+        response: boolean;
+        log: boolean;
+    };
 };
 declare function gateway(this: any, options: GatewayOptions): {
     exports: {
@@ -29,16 +36,7 @@ declare function gateway(this: any, options: GatewayOptions): {
     };
 };
 declare namespace gateway {
-    var defaults: {
-        allow: any;
-        custom: any;
-        fixed: any;
-        error: {
-            message: boolean;
-            details: boolean;
-        };
-        debug: boolean;
-    };
+    var defaults: GatewayOptions;
 }
 export type { GatewayOptions, GatewayResult, };
 export default gateway;
