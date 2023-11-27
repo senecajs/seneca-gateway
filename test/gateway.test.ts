@@ -109,25 +109,24 @@ describe('gateway', () => {
     result.out.meta$.id = 'METAID'
     result.meta = { pattern: result.meta.pattern }
 
-    expect(result).toEqual({
+    expect(result).toMatchObject({
       error: true,
       meta: {
-        pattern: 'bar:1'
+        pattern: 'bar:1',
       },
       gateway$: {},
       out: {
-        error$: {
-          name: 'Error',
-          message: 'bar',
-        },
+        name: 'Error',
+        message: 'bar',
         meta$: {
           id: "METAID",
+          error: true,
         },
       },
     })
 
     // undefs removed
-    expect(Object.keys(result.out.error$)).toEqual(['name', 'message'])
+    expect(Object.keys(result.out)).toEqual(['meta$', 'name', 'id', 'message'])
 
     const s1 = Seneca({ legacy: false })
       .test()
@@ -143,18 +142,17 @@ describe('gateway', () => {
     result.out.meta$.id = 'METAID'
     result.meta = { pattern: result.meta.pattern }
 
-    expect(result).toEqual({
+    expect(result).toMatchObject({
       error: true,
       meta: {
-        pattern: 'bar:1'
+        pattern: 'bar:1',
       },
       gateway$: {},
       out: {
-        error$: {
-          name: 'Error',
-        },
+        name: 'Error',
         meta$: {
           id: "METAID",
+          error: true,
         },
       },
     })

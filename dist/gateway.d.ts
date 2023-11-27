@@ -3,6 +3,7 @@ type GatewayResult = {
         meta$: any;
         error$: {
             name: string;
+            id: string;
             code?: string;
             message?: string;
             details?: any;

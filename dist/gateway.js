@@ -13,6 +13,7 @@ function gateway(options) {
     const Patrun = seneca.util.Patrun;
     const Jsonic = seneca.util.Jsonic;
     const allowed = new Patrun({ gex: true });
+    const errid = seneca.util.Nid({ length: 9 });
     const checkAllowed = null != options.allow;
     if (checkAllowed) {
         for (let patStr in options.allow) {
@@ -93,6 +94,7 @@ function gateway(options) {
                 if (!allowMsg) {
                     let errdesc = {
                         name: 'Error',
+                        id: errid(),
                         code: 'not-allowed',
                         message: 'Message not allowed',
                         details: undefined,
@@ -154,15 +156,15 @@ function gateway(options) {
                 delete out.gateway$;
                 if (err) {
                     result.error = true;
-                    result.out = {
+                    out.meta$.error = true;
+                    result.out = nundef({
                         meta$: out.meta$,
-                        error$: nundef({
-                            name: err.name,
-                            code: err.code,
-                            message: options.error.message ? err.message : undefined,
-                            details: options.error.details ? err.details : undefined,
-                        })
-                    };
+                        name: err.name,
+                        id: err.id || errid(),
+                        code: err.code,
+                        message: options.error.message ? err.message : undefined,
+                        details: options.error.details ? err.details : undefined,
+                    });
                 }
                 resolve(result);
             });

@@ -19,6 +19,7 @@ type GatewayResult = {
     // Extracted from Error object
     error$: {
       name: string
+      id: string
       code?: string
       message?: string
       details?: any
@@ -65,6 +66,7 @@ function gateway(this: any, options: GatewayOptions) {
   const Patrun = seneca.util.Patrun
   const Jsonic = seneca.util.Jsonic
   const allowed = new Patrun({ gex: true })
+  const errid = seneca.util.Nid({ length: 9 })
 
   const checkAllowed = null != options.allow
 
@@ -169,6 +171,7 @@ function gateway(this: any, options: GatewayOptions) {
         if (!allowMsg) {
           let errdesc: any = {
             name: 'Error',
+            id: errid(),
             code: 'not-allowed',
             message: 'Message not allowed',
             details: undefined,
@@ -242,15 +245,16 @@ function gateway(this: any, options: GatewayOptions) {
 
         if (err) {
           result.error = true
-          result.out = {
+          out.meta$.error = true
+
+          result.out = nundef({
             meta$: out.meta$,
-            error$: nundef({
-              name: err.name,
-              code: (err as any).code,
-              message: options.error.message ? err.message : undefined,
-              details: options.error.details ? err.details : undefined,
-            })
-          }
+            name: err.name,
+            id: (err as any).id || errid(),
+            code: (err as any).code,
+            message: options.error.message ? err.message : undefined,
+            details: options.error.details ? err.details : undefined,
+          })
         }
 
         resolve(result)
