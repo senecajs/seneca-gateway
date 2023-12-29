@@ -159,7 +159,7 @@ describe('gateway', () => {
   })
 
 
-  test('allow', async () => {
+  test('allow-pattern', async () => {
     const seneca = Seneca({ legacy: false }).test().use('promisify').use(Gateway, {
       allow: {
         'foo:1': true,
@@ -255,6 +255,48 @@ describe('gateway', () => {
           code: 'not-allowed',
           message: 'Message not allowed'
         }
+      }
+    })
+
+  })
+
+
+
+  test('allow-params', async () => {
+    const seneca = Seneca({ legacy: false }).test().use('promisify').use(Gateway, {
+      allow: {
+        'foo:1': ['a:2', { b: 3, c: 4 }],
+      }
+    })
+      .message('foo:1', async function(msg: any) {
+        return { x: msg.x, n: 'foo' }
+      })
+      .message('bar:2', async function(msg: any) {
+        return { x: msg.x, n: 'bar' }
+      })
+
+    await seneca.ready()
+    let handler1 = seneca.export('gateway/handler')
+
+
+    expect(await seneca.post('foo:1,a:2,x:11')).toEqual({ x: 11, n: 'foo' })
+    expect(await seneca.post('foo:1,b:3,c:4,x:22')).toEqual({ x: 22, n: 'foo' })
+
+    expect(await handler1({ foo: 1, a: 2, x: 11 })).toMatchObject({ out: { x: 11, n: 'foo' } })
+    expect(await handler1({ foo: 1, b: 3, c: 4, x: 22 }))
+      .toMatchObject({ out: { x: 22, n: 'foo' } })
+
+    expect(await handler1({ foo: 1, a: 3, x: 44 })).toMatchObject({
+      error: true,
+      out: {
+        code: 'not-allowed',
+      }
+    })
+
+    expect(await handler1({ foo: 1, bar: 2, x: 33 })).toMatchObject({
+      error: true,
+      out: {
+        code: 'not-allowed',
       }
     })
 

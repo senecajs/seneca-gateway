@@ -14,7 +14,7 @@ type GatewayResult = {
     gateway$?: Record<string, any>;
 };
 type GatewayOptions = {
-    allow: any;
+    allow: Record<string, boolean | (string | object)[]>;
     custom: any;
     fixed: any;
     timeout: {
