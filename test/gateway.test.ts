@@ -261,7 +261,6 @@ describe('gateway', () => {
   })
 
 
-
   test('allow-params', async () => {
     const seneca = Seneca({ legacy: false }).test().use('promisify').use(Gateway, {
       allow: {
