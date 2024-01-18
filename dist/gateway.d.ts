@@ -32,6 +32,7 @@ type GatewayOptions = {
 };
 declare function gateway(this: any, options: GatewayOptions): {
     exports: {
+        prepare: (json: any, ctx: any) => Promise<any>;
         handler: (json: any, ctx: any) => Promise<unknown>;
         parseJSON: (data: any) => any;
     };

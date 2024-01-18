@@ -252,6 +252,7 @@ function gateway(options) {
     }
     return {
         exports: {
+            prepare,
             handler,
             parseJSON,
         }

@@ -369,6 +369,7 @@ function gateway(this: any, options: GatewayOptions) {
 
   return {
     exports: {
+      prepare,
       handler,
       parseJSON,
     }
