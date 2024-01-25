@@ -80,6 +80,7 @@ function gateway(options) {
         if (options.debug.log) {
             root.log.debug('gateway-handler-json', { json });
         }
+        const gateway$ = (ctx === null || ctx === void 0 ? void 0 : ctx.gateway$) || {};
         const seneca = await prepare(json, ctx);
         const rawmsg = tu.internalize_msg(seneca, json);
         const msg = seneca.util.clean(rawmsg);
@@ -162,6 +163,9 @@ function gateway(options) {
             }
             if (options.debug.log) {
                 seneca.log.debug('handler-act', { msg });
+            }
+            if (gateway$.local) {
+                msg.local$ = true;
             }
             seneca.act(msg, async function (err, out, meta) {
                 for (var i = 0; i < hooks.result.length; i++) {

@@ -153,11 +153,12 @@ function gateway(this: any, options: GatewayOptions) {
 
 
   // Handle inbound JSON, converting it into a message, and submitting to Seneca.
-  async function handler(json: any, ctx: any) {
+  async function handler(json: any, ctx?: any) {
     if (options.debug.log) {
       root.log.debug('gateway-handler-json', { json })
     }
 
+    const gateway$ = ctx?.gateway$ || {}
     const seneca = await prepare(json, ctx)
     const rawmsg = tu.internalize_msg(seneca, json)
     const msg = seneca.util.clean(rawmsg)
@@ -258,6 +259,10 @@ function gateway(this: any, options: GatewayOptions) {
 
       if (options.debug.log) {
         seneca.log.debug('handler-act', { msg })
+      }
+
+      if (gateway$.local) {
+        msg.local$ = true
       }
 
       seneca.act(msg, async function(this: any, err: any, out: any, meta: any) {
