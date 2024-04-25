@@ -35,7 +35,6 @@ function gateway(options) {
             }
             allowed.add(msgCanonObj, paramAllowed);
         }
-        // console.log('ALLOWED', allowed.toString())
     }
     const hooknames = [
         // Functions to modify the custom object in Seneca message meta$ descriptions

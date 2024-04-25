@@ -95,8 +95,6 @@ function gateway(this: any, options: GatewayOptions) {
 
       allowed.add(msgCanonObj, paramAllowed)
     }
-
-    // console.log('ALLOWED', allowed.toString())
   }
 
 
