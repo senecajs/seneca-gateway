@@ -10,19 +10,18 @@ const GatewayMessages = require('./gateway.messages').default
 describe('gateway', () => {
 
   test('happy', async () => {
-    const seneca = Seneca({ legacy: false }).test().use('promisify').use(Gateway)
+    const seneca = Seneca({ legacy: false }).test().use(Gateway)
     await seneca.ready()
   })
 
   test('messages', async () => {
-    const seneca = Seneca({ legacy: false }).test().use('promisify').use(Gateway)
+    const seneca = Seneca({ legacy: false }).test().use(Gateway)
     await (SenecaMsgTest(seneca, GatewayMessages)())
   })
 
   test('handler', async () => {
     const seneca = Seneca({ legacy: false })
       .test()
-      .use('promisify')
       .use(Gateway, {
         custom: {
           z: 3
@@ -53,8 +52,31 @@ describe('gateway', () => {
   })
 
 
+  // Seneca 4 closes plain-object defaults: custom and fixed must stay open.
+  test('options-open', async () => {
+    const seneca = Seneca({ legacy: false })
+      .test()
+      .use(Gateway, {
+        custom: { z: 3, zz: { a: 1 } },
+        fixed: { w: 4 },
+      })
+
+    seneca.message('foo:1', async (msg: any, meta: any) => ({
+      w: msg.w,
+      z: meta.custom.z,
+      zz: meta.custom.zz,
+      safe: meta.custom.safe,
+    }))
+
+    await seneca.ready()
+    let handler = seneca.export('gateway/handler')
+    let result = await handler({ foo: 1 })
+    expect(result.out).toMatchObject({ w: 4, z: 3, zz: { a: 1 }, safe: false })
+  })
+
+
   test('tag', async () => {
-    const seneca = Seneca({ legacy: false }).test().use('promisify').use({
+    const seneca = Seneca({ legacy: false }).test().use({
       define: Gateway, tag: 'foo'
     })
     await seneca.ready()
@@ -71,7 +93,6 @@ describe('gateway', () => {
     const s0 = Seneca({ legacy: false })
       .test()
       .quiet()
-      .use('promisify')
       .use(Gateway, {
         error: {
           message: true,
@@ -131,7 +152,6 @@ describe('gateway', () => {
     const s1 = Seneca({ legacy: false })
       .test()
       .quiet()
-      .use('promisify')
       .use(Gateway)
       .message('bar:1', async (_msg: any) => { throw new Error('bar') })
 
@@ -160,7 +180,7 @@ describe('gateway', () => {
 
 
   test('allow-pattern', async () => {
-    const seneca = Seneca({ legacy: false }).test().use('promisify').use(Gateway, {
+    const seneca = Seneca({ legacy: false }).test().use(Gateway, {
       allow: {
         'foo:1': true,
         'bar:a,zed:b': true,
@@ -262,7 +282,7 @@ describe('gateway', () => {
 
 
   test('allow-params', async () => {
-    const seneca = Seneca({ legacy: false }).test().use('promisify').use(Gateway, {
+    const seneca = Seneca({ legacy: false }).test().use(Gateway, {
       allow: {
         'foo:1': ['a:2', { b: 3, c: 4 }],
       }
