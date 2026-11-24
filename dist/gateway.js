@@ -1,11 +1,6 @@
 "use strict";
 /* Copyright © 2021-2023 Richard Rodger, MIT License. */
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-const seneca_1 = __importDefault(require("seneca"));
-const { Open, Skip } = seneca_1.default.valid;
 function gateway(options) {
     let seneca = this;
     const root = seneca.root;
@@ -269,17 +264,17 @@ function nundef(o) {
     }
     return o;
 }
-// Default options.
-gateway.defaults = {
+// Default options, built with the validator that Seneca passes in.
+gateway.defaults = ({ valid }) => ({
     // Keys are pattern strings.
-    allow: Skip(Open({})),
+    allow: valid.Skip(valid.Open({})),
     // Add custom meta data values.
-    custom: Open({
+    custom: valid.Open({
         // Assume gateway is used to handle external messages.
         safe: false
     }),
     // Set request delegate fixed values.
-    fixed: Open({}),
+    fixed: valid.Open({}),
     // Allow clients to set a custom timeout (using the timeout$ directive).
     timeout: {
         // Clients can set a custom timeout.
@@ -301,7 +296,7 @@ gateway.defaults = {
         // Produce detailed debug logging.
         log: false,
     }
-};
+});
 exports.default = gateway;
 if ('undefined' !== typeof (module)) {
     module.exports = gateway;

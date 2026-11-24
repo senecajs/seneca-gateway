@@ -1,3 +1,4 @@
+import type Seneca from 'seneca';
 type GatewayResult = {
     out: any | {
         meta$: any;
@@ -30,7 +31,7 @@ type GatewayOptions = {
         log: boolean;
     };
 };
-declare function gateway(this: any, options: GatewayOptions): {
+declare function gateway(this: Seneca.Instance, options: GatewayOptions): {
     exports: {
         prepare: (json: any, ctx: any) => Promise<any>;
         handler: (json: any, ctx?: any) => Promise<unknown>;
@@ -38,7 +39,9 @@ declare function gateway(this: any, options: GatewayOptions): {
     };
 };
 declare namespace gateway {
-    var defaults: GatewayOptions;
+    var defaults: ({ valid }: {
+        valid: Seneca.Instance["valid"];
+    }) => Record<string, any>;
 }
 export type { GatewayOptions, GatewayResult, };
 export default gateway;

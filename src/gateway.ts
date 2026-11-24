@@ -1,9 +1,7 @@
 /* Copyright © 2021-2023 Richard Rodger, MIT License. */
 
 
-import Seneca from 'seneca'
-
-const { Open, Skip } = Seneca.valid
+import type Seneca from 'seneca'
 
 
 // Seneca action result.
@@ -58,7 +56,7 @@ type GatewayOptions = {
 }
 
 
-function gateway(this: any, options: GatewayOptions) {
+function gateway(this: Seneca.Instance, options: GatewayOptions) {
   let seneca: any = this
   const root: any = seneca.root
   const tu: any = seneca.export('transport/utils')
@@ -390,21 +388,21 @@ function nundef(o: any) {
 }
 
 
-// Default options.
-gateway.defaults = ({
+// Default options, built with the validator that Seneca passes in.
+gateway.defaults = ({ valid }: { valid: Seneca.Instance['valid'] }): Record<string, any> => ({
 
   // Keys are pattern strings.
-  allow: Skip(Open({})),
+  allow: valid.Skip(valid.Open({})),
 
   // Add custom meta data values.
-  custom: Open({
+  custom: valid.Open({
 
     // Assume gateway is used to handle external messages.
     safe: false
   }),
 
   // Set request delegate fixed values.
-  fixed: Open({}),
+  fixed: valid.Open({}),
 
   // Allow clients to set a custom timeout (using the timeout$ directive).
   timeout: {
@@ -435,7 +433,7 @@ gateway.defaults = ({
     // Produce detailed debug logging.
     log: false,
   }
-} as GatewayOptions)
+})
 
 
 export type {
